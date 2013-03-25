@@ -17,7 +17,7 @@ module FloCalendar
       current_date = Date.today
       calendar_view = []
       12.times do
-        range = build_range selected_month, options
+        range = build_total_range selected_month, options
         month_array = range.each_slice(7).to_a
         calendar_view << flo_draw_calendar(selected_month, month_array, current_date, events, options, block)
         selected_month = selected_month.next_month()
@@ -31,7 +31,7 @@ module FloCalendar
       tags = []
       today = Date.today
       tags << content_tag(:table) do
-        tags << month_header(selected_month, options)
+        tags << draw_month_header(selected_month, options)
         day_names = I18n.t("date.abbr_day_names")
         day_names = day_names.rotate((Date::DAYS_INTO_WEEK[options[:start_day]] + 1) % 7)
         content_tag(:body) do
@@ -45,7 +45,7 @@ module FloCalendar
                 td_class << "future" if today < date
                 td_class << "wday-#{date.wday.to_s}" # <- to enable different styles for weekend, etc
 
-                cur_events = day_events(date, events)
+                cur_events = draw_day_events(date, events)
 
                 td_class << (cur_events.any? ? "events" : "no-events")
 
@@ -72,7 +72,7 @@ module FloCalendar
       tags.join.html_safe
     end
 
-    def build_range(selected_month, options)
+    def build_total_range(selected_month, options)
       start_date = selected_month.beginning_of_month.beginning_of_week(options[:start_day])
       end_date   = selected_month.end_of_month.end_of_week(options[:start_day])
 
@@ -80,12 +80,12 @@ module FloCalendar
     end
 
     # Returns an array of events for a given day
-    def day_events(date, events)
+    def draw_day_events(date, events)
       events.select { |e| e.start_time.to_date == date }
     end
 
     # Generates the header that includes the month and next and previous months
-    def month_header(selected_month, options)
+    def draw_month_header(selected_month, options)
       content_tag :h2 do
         tags = []
 
